@@ -1,0 +1,84 @@
+import os
+import cv2
+from tkinter import *
+from PIL import ImageTk, Image
+
+win = Tk()
+win.geometry("800x600+400+200")
+bg_color = "#708f93"
+win.configure(bg=bg_color)
+path = "path for your colors images/"
+
+images = os.listdir(path)
+imgs_lst = []
+
+for img in images:
+    print(img)
+    imgs = cv2.imread(f"{path}/{img}")
+    image = cv2.cvtColor(imgs, cv2.COLOR_BGR2RGB)
+    image = cv2.resize(image, (500, 500))
+    imgs_lst.append(image)
+
+class Control():
+    def __init__(self):
+        self.screen = Label(win)
+        self.mouse_pos = Label(win,bg=bg_color,fg="white")
+        self.mouse_pos.place(x=600, y=180)
+        self.color_label = Label(win)
+        self.color_label.place(x=600, y=50,width=150,height=100)
+        self.input = Entry(win)
+        self.input.place(x=600, y=250 , width=150)
+        self.input2 = Entry(win)
+        self.input2.place(x=600, y=350, width=150)
+        self.btn = Button(win,text="Change image",command=self.change_img_color)
+        self.btn.place(x=600, y=450)
+        self.counter = 0
+        self.display()
+        # self.color_lst = []
+    def to_pil(self, img):
+        image = Image.fromarray(img)
+        pic = ImageTk.PhotoImage(image)
+        self.screen.configure(image=pic)
+        self.screen.image = pic
+        self.screen.place(x=20, y=50)
+
+    def move_mouse(self, event):
+        x = event.x
+        y = event.y
+        self.mouse_pos.configure(text=f"x= {x}  y= {y}")
+        img = imgs_lst[self.counter]
+        self.screen.bind('<Button-1>', lambda e: self.capture_color(img, x, y))
+
+    def rgb2hex(self, rgb):
+        return '#%02x%02x%02x' % rgb
+
+    def capture_color(self, img, x, y):
+        hints = StringVar()
+        hints2 = StringVar()
+        color = img[y, x, :]
+        r, g, b = color
+        rgb = self.rgb2hex((r, g, b))
+        hints.set(rgb)
+        self.input['textvariable'] = hints
+        hints2.set(f"{b},{g},{r}")#for opencv and rgb for the rest of use
+        self.input2['textvariable'] = hints2
+        self.color_label['bg'] = rgb
+        # print(r, g, b, 'hex= ', rgb)
+
+    def change_img_color(self):
+        self.counter +=1
+        if self.counter >= len(imgs_lst):
+            self.counter = 0
+        self.display()
+
+    def display(self):
+        print(self.counter)
+        self.to_pil(imgs_lst[self.counter])
+        self.screen.bind('<Motion>', self.move_mouse)
+
+if __name__ == '__main__':
+    Control()
+    win.mainloop()
+
+cv2.destroyAllWindows()
+
