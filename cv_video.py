@@ -2,7 +2,7 @@ import flet as ft
 import base64
 import cv2
 
-cap = cv2.VideoCapture("D:\Images_for_py\Videos/traffic.mp4")
+cap = cv2.VideoCapture("Your video path")
 
 class Countdown(ft.UserControl):
     def __init__(self):
